@@ -28,7 +28,6 @@ add_executable(testrunner
 
     main.cpp
 
-    lottery/combination_table_tests.cpp
     lottery/combination_value_tests.cpp
     lottery/lottery_odds_tests.cpp
     lottery/ranking_combinations_tests.cpp

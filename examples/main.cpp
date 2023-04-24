@@ -216,6 +216,9 @@ int main(int argc, char* argv[])
 
     const auto start = std::chrono::high_resolution_clock::now();
 
+    nhl::lottery::machine machine;
+    nhl::lottery::combination_table combinations;
+
     for (std::size_t sim = 0; sim < stats.simulations; ++sim)
     {
         if (print_progress)
@@ -225,9 +228,8 @@ int main(int argc, char* argv[])
             temp::println("");
         }
 
-        nhl::lottery::machine machine;
-        nhl::lottery::combination_table combinations;
-        combinations.populate();
+        // randomize the combinations for each simulation
+        combinations.randomize();
 
         auto draft_order = nhl::lottery::rankings;
 
