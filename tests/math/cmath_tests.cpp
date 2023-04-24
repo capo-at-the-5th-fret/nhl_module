@@ -1,9 +1,9 @@
 #include <doctest/doctest.h>
 
-import math;
-
 #include <array>
 #include <stdexcept>
+
+import math;
 
 TEST_CASE("number_of_digits")
 {
