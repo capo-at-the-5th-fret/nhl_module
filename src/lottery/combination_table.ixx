@@ -71,17 +71,11 @@ export namespace nhl::lottery
         std::vector<std::reference_wrapper<kv_type>> sorted_combinations
             ( table.combinations().begin(), table.combinations().end() );
 
-        std::sort(sorted_combinations.begin(), sorted_combinations.end(),
+        std::ranges::sort(sorted_combinations,
             [](auto const& lhs, auto const& rhs)
             {
                 return lhs.get().first < rhs.get().first;
             });
-
-        // std::ranges::sort(sorted_combinations,
-        //     [](auto const& lhs, auto const& rhs)
-        //     {
-        //         return lhs.get().first < rhs.get().first;
-        //     });
 
         for (auto const& combo : sorted_combinations)
         {
