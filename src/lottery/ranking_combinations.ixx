@@ -51,29 +51,42 @@ export namespace nhl::lottery
             pos->combinations : 0;
     }
 
+    namespace detail
+    {
+        inline constexpr std::array ranking_combination_distribution = []()
+        {
+            std::array<int, combinations_used_count> ret;
+
+            // A ranking will be added to the return array for each possible
+            // combination for that ranking
+            // i.e.
+            // - if N were 100 and ranking 1 had 15% odds, then 1 would appear in
+            //   the return array 15 times
+            // - if N were 100 and ranking 2 had 12% odds, then 2 would appear in
+            //   the return array 12 times
+            // etc.
+
+            std::size_t ret_index{ 0 };
+            for (auto const& [ranking, combinations] : combinations_per_ranking)
+            {
+                for (std::size_t n = 0; n < combinations; ++n)
+                {
+                    ret[ret_index++] = ranking;
+                }
+            }
+
+            return ret;
+        }();
+    }
+    
     // NOTE: Can't be constexpr due to std::random_device
     inline std::array<int, combinations_used_count>
         ranking_combination_distribution(bool shuffle = true)
     {
-        std::array<int, combinations_used_count> ret;
-
-        // A ranking will be added to the return array for each possible
-        // combination for that ranking
-        // i.e.
-        // - if N were 100 and ranking 1 had 15% odds, then 1 would appear in
-        //   the return array 15 times
-        // - if N were 100 and ranking 2 had 12% odds, then 2 would appear in
-        //   the return array 12 times
-        // etc.
-        
-        std::size_t ret_index{ 0 };
-        for (auto const& [ranking, combinations] : combinations_per_ranking)
+        std::array<int, combinations_used_count> ret
         {
-            for (std::size_t n = 0; n < combinations; ++n)
-            {
-                ret[ret_index++] = ranking;
-            }
-        }
+            detail::ranking_combination_distribution
+        };
 
         static std::random_device rd;
         static std::mt19937 gen{ rd() };

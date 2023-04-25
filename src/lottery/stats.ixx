@@ -24,4 +24,35 @@ export namespace nhl::lottery
         // round -> # of redraws in that round
         std::unordered_map<round_number, std::size_t> redraws;
     };
+
+    void record_lottery_winner(lottery_stats& stats,
+        round_number const& rn, int pre_lottery_ranking)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.lottery_winner_stats[rn][pre_lottery_ranking]++;
+    }
+
+    void record_draft_order_ranking(lottery_stats& stats,
+        int pre_lottery_ranking, int post_lottery_ranking)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.draft_order_stats[pre_lottery_ranking][post_lottery_ranking]++;
+    }
+
+    void record_original_draft_order_retained(lottery_stats& stats)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.original_draft_order_retained++;
+    }
+
+    // round -> # of redraws in that round
+    void record_redraw(lottery_stats& stats, round_number const& rn)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.redraws[rn]++;
+    }
 }

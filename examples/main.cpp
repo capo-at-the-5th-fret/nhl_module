@@ -214,15 +214,16 @@ int main(int argc, char* argv[])
     temp::println("Running simulation(s)...");
     temp::println("");
 
-    const auto start = std::chrono::high_resolution_clock::now();
+    // TODO: For fast times, uncomment this and comment out the table inside the
+    // for_each loop below. Doing this will randomize once, and that table will
+    // be used for all simulations
+    //nhl::lottery::combination_table combinations{ true };
 
-    //nhl::lottery::machine machine;
-    nhl::lottery::combination_table combinations;
+    const auto start = std::chrono::high_resolution_clock::now();
 
     const auto vw = std::views::iota(std::size_t{ 0 }, stats.simulations);
     std::for_each(std::execution::par, vw.begin(), vw.end(),
-        [&combinations, &stats](auto sim)
-    //for (std::size_t sim = 0; sim < stats.simulations; ++sim)
+        [&stats](auto sim)
     {
         if (print_progress)
         {
@@ -232,8 +233,7 @@ int main(int argc, char* argv[])
         }
 
         nhl::lottery::machine machine;
-        // randomize the combinations for each simulation
-        //combinations.randomize();
+        nhl::lottery::combination_table combinations{ true };
 
         auto draft_order = nhl::lottery::rankings;
 
@@ -293,7 +293,8 @@ int main(int argc, char* argv[])
 
                 if (winners.contains(*winner))
                 {
-                    stats.redraws[round]++;
+                    record_redraw(stats, round);
+                    //stats.redraws[round]++;
 
                     if (print_progress)
                     {
@@ -324,13 +325,15 @@ int main(int argc, char* argv[])
                     );
 
                     winners.insert(*winner);
-                    stats.lottery_winner_stats[round][*winner]++;
+                    record_lottery_winner(stats, round, *winner);
+                    //stats.lottery_winner_stats[round][*winner]++;
 
                     ++round;
                 }
                 else
                 {
-                    stats.redraws[round]++;
+                    record_redraw(stats, round);
+                    //stats.redraws[round]++;
 
                     if (print_progress)
                     {
@@ -346,7 +349,8 @@ int main(int argc, char* argv[])
             }
             else
             {
-                stats.redraws[round]++;
+                record_redraw(stats, round);
+                //stats.redraws[round]++;
 
                 if (print_progress)
                 {
@@ -364,13 +368,15 @@ int main(int argc, char* argv[])
 
         for (int ranking = 1; auto team : draft_order)
         {
-            stats.draft_order_stats[team][ranking]++;
+            record_draft_order_ranking(stats, team, ranking);
+            //stats.draft_order_stats[team][ranking]++;
             ++ranking;
         }
 
         if (std::ranges::is_sorted(draft_order))
         {
-            stats.original_draft_order_retained++;
+            record_original_draft_order_retained(stats);
+            //stats.original_draft_order_retained++;
         }
 
         if (print_progress)
