@@ -10,6 +10,7 @@ export import <chrono>;
 export import <compare>;
 export import <cstddef>;
 export import <cstdint>;
+export import <execution>;
 export import <format>;
 export import <functional>;
 export import <iostream>;

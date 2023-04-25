@@ -216,10 +216,13 @@ int main(int argc, char* argv[])
 
     const auto start = std::chrono::high_resolution_clock::now();
 
-    nhl::lottery::machine machine;
+    //nhl::lottery::machine machine;
     nhl::lottery::combination_table combinations;
 
-    for (std::size_t sim = 0; sim < stats.simulations; ++sim)
+    const auto vw = std::views::iota(std::size_t{ 0 }, stats.simulations);
+    std::for_each(std::execution::par, vw.begin(), vw.end(),
+        [&combinations, &stats](auto sim)
+    //for (std::size_t sim = 0; sim < stats.simulations; ++sim)
     {
         if (print_progress)
         {
@@ -228,8 +231,9 @@ int main(int argc, char* argv[])
             temp::println("");
         }
 
+        nhl::lottery::machine machine;
         // randomize the combinations for each simulation
-        combinations.randomize();
+        //combinations.randomize();
 
         auto draft_order = nhl::lottery::rankings;
 
@@ -373,7 +377,7 @@ int main(int argc, char* argv[])
         {
             nhl::lottery::print_draft_order(draft_order);
         }
-    }
+    });
 
     const auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
