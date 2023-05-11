@@ -14,10 +14,15 @@ add_library(nhl STATIC
         lottery/ranking.ixx
         lottery/ranking_combinations.ixx
         lottery/round.ixx
+        lottery/round_winners.ixx
         lottery/stats.ixx
 
         math/cmath.ixx
         math/percentage.ixx
+
+        stdex/functional.ixx
+        stdex/stdex.ixx
+        stdex/type_traits.ixx
 
         conference.ixx
         division.ixx

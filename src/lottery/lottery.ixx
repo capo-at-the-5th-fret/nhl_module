@@ -13,4 +13,5 @@ export import :lottery_parameters;
 export import :lottery_ranking_combinations;
 export import :lottery_ranking;
 export import :lottery_round;
+export import :lottery_round_winners;
 export import :lottery_stats;

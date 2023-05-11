@@ -237,6 +237,7 @@ int main(int argc, char* argv[])
 
         auto draft_order = nhl::lottery::rankings;
 
+        nhl::lottery::round_winners round_winners;
         std::unordered_set<int> winners;
 
         for (nhl::lottery::round_number round{ 1 }; round <=
@@ -326,6 +327,7 @@ int main(int argc, char* argv[])
 
                     winners.insert(*winner);
                     record_lottery_winner(stats, round, *winner);
+                    round_winners.push(*winner);
                     //stats.lottery_winner_stats[round][*winner]++;
 
                     ++round;
@@ -366,6 +368,8 @@ int main(int argc, char* argv[])
             }
         }
 
+        record_lottery_winners(stats, round_winners);
+
         for (int ranking = 1; auto team : draft_order)
         {
             record_draft_order_ranking(stats, team, ranking);
@@ -391,5 +395,6 @@ int main(int argc, char* argv[])
     temp::println("");
 
     nhl::lottery::print_lottery_winner_stats(stats);
+    nhl::lottery::print_lottery_round_winners_stats(stats);
     nhl::lottery::print_draft_order_lottery_stats(stats);
 }

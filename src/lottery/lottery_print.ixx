@@ -51,6 +51,48 @@ export namespace nhl::lottery
         }
     }
 
+    inline void print_lottery_round_winners_stats(lottery_stats const& stats)
+    {
+        const std::string_view simulation_suffix =
+                (stats.simulations == 1) ? "simulation" : "simulations";
+
+        temp::println("[ Lottery Round Winners ] ({} {})",
+            stats.simulations, simulation_suffix);
+        temp::println("");
+
+        temp::println("{:^10} {:^12} {:^10} {:^10}",
+            "#", "Winners", "Occurances", "Pct.");
+        temp::println("{0:10} {1:12} {0:10} {0:10}", "----------", "------------");
+
+        // sort the combinations with the help of a vector + reference_wrapper
+
+        using kv_type = std::add_const_t<
+            typename decltype(stats.round_winners_stats)::value_type>;
+
+        std::vector<std::reference_wrapper<kv_type>> sorted_round_winners
+            ( stats.round_winners_stats.begin(), stats.round_winners_stats.end() );
+
+        std::ranges::sort(sorted_round_winners,
+            [](auto const& lhs, auto const& rhs)
+            {
+                //return lhs.get().first < rhs.get().first;
+                return rhs.get().second < lhs.get().second;
+            });
+
+        for (int i = 1; auto const& round_winner : sorted_round_winners)
+        {
+            temp::println("{:^10} {:^12} {:^10} {:^10.6f}",
+                i++,
+                round_winner.get().first,
+                round_winner.get().second,
+                math::percent(round_winner.get().second,
+                stats.simulations).to_ratio()
+            );
+        }
+
+        temp::println("");
+    }
+
     inline void print_draft_order_lottery_stats(lottery_stats const& stats)
     {
         const std::string_view simulation_suffix =

@@ -1,8 +1,10 @@
 export module nhl:lottery_stats;
 
 import temp_std;
+import stdex;
 import :lottery_teams;
 import :lottery_round;
+import :lottery_round_winners;
 
 export namespace nhl::lottery
 {
@@ -14,6 +16,10 @@ export namespace nhl::lottery
 
         // round -> { pre-lottery ranking -> # of wins }
         std::map<round_number, std::map<int, std::size_t>> lottery_winner_stats;
+
+        // round winners (combination) -> # of wins for that combination
+        // i.e. if 2 won the 1st round, and 7 the second, the combo is 2,7
+        std::unordered_map<round_winners, std::size_t> round_winners_stats;
 
         // pre-lottery ranking -> { post-lottery ranking -> count }
         std::unordered_map<int, std::unordered_map<int, std::size_t>> draft_order_stats;
@@ -31,6 +37,14 @@ export namespace nhl::lottery
         static std::mutex m;
         std::unique_lock lk{ m };
         stats.lottery_winner_stats[rn][pre_lottery_ranking]++;
+    }
+
+    void record_lottery_winners(lottery_stats& stats,
+        round_winners const& rw)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.round_winners_stats[rw]++;
     }
 
     void record_draft_order_ranking(lottery_stats& stats,
