@@ -5,6 +5,7 @@ import stdex;
 import :lottery_teams;
 import :lottery_round;
 import :lottery_round_winners;
+import :lottery_potential_winners;
 
 export namespace nhl::lottery
 {
@@ -29,6 +30,21 @@ export namespace nhl::lottery
 
         // round -> # of redraws in that round
         std::unordered_map<round_number, std::size_t> redraws;
+
+        // Number of potential winners after 3 balls are drawn -> count
+        std::unordered_map<std::size_t, std::size_t> potential_winners;
+
+        // 'clean sweep' is when a single team is guaranteed to win a lottery
+        // with the final ball (one team has all 11 combos that can win)
+        std::unordered_map<round_number, std::size_t> clean_sweeps;
+
+        // 'royal flush' is when each team from 1 to 11 in the first round has
+        // a chance to win a lottery with the final ball
+        std::unordered_map<round_number, std::size_t> royal_flushes;
+
+        // 'flush' is when 11 teams have a chance to win a lottery with the
+        // final ball
+        std::unordered_map<round_number, std::size_t> flushes;
     };
 
     void record_lottery_winner(lottery_stats& stats,
@@ -68,5 +84,34 @@ export namespace nhl::lottery
         static std::mutex m;
         std::unique_lock lk{ m };
         stats.redraws[rn]++;
+    }
+
+    void record_potential_winners(lottery_stats& stats, round_number const& rn,
+        potential_winners const& pw)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.potential_winners[pw.unique_winners().size()]++;
+    }
+
+    void record_clean_sweep(lottery_stats& stats, round_number const& rn)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.clean_sweeps[rn]++;
+    }
+
+    void record_royal_flush(lottery_stats& stats, round_number const& rn)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.royal_flushes[rn]++;
+    }
+
+    void record_flush(lottery_stats& stats, round_number const& rn)
+    {
+        static std::mutex m;
+        std::unique_lock lk{ m };
+        stats.flushes[rn]++;
     }
 }

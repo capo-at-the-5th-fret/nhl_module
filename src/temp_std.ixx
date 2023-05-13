@@ -19,6 +19,7 @@ export import <numeric>;
 export import <optional>;
 export import <random>;
 export import <ranges>;
+export import <set>;
 export import <span>;
 export import <string_view>;
 export import <string>;

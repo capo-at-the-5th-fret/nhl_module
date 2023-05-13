@@ -38,6 +38,8 @@ export namespace nhl::lottery
                 );
             }
 
+            temp::println("{}", "--------------------------------");
+
             std::size_t redraws{ 0 };
 
             if (auto pos = stats.redraws.find(round);
@@ -46,7 +48,74 @@ export namespace nhl::lottery
                 redraws = pos->second;
             }
 
-            temp::println("{} redraws", redraws);
+            temp::println("{:^10} {:^10} {:^10.3f}", "Redraws", redraws,
+                math::percent(redraws, stats.simulations).to_ratio());
+            temp::println("");
+
+            temp::println("{:^17} {:^10} {:^10}", "Potential Winners", "Count", "Pct.");
+            temp::println("{0:17} {1:10} {1:10}", "-----------------", "----------");
+
+            {
+                for (auto [potential_winners, count] : stats.potential_winners)
+                {
+                    temp::println("{:^17} {:^10} {:^10.6f}", potential_winners,
+                        count, math::percent(count, stats.simulations).to_ratio());
+                }
+            }
+
+            temp::println("{}", "---------------------------------------");
+
+            {
+                std::size_t clean_sweeps{ 0 };
+
+                if (auto pos = stats.clean_sweeps.find(round);
+                    pos != stats.clean_sweeps.end())
+                {
+                    clean_sweeps = pos->second;
+                }
+
+                if (clean_sweeps > 0)
+                {
+                    temp::println("{:^17} {:^10} {:^10.6f}", "Clean Sweeps",
+                        clean_sweeps,
+                        math::percent(clean_sweeps, stats.simulations).to_ratio());
+                }
+            }
+
+            {
+                std::size_t royal_flushes{ 0 };
+
+                if (auto pos = stats.royal_flushes.find(round);
+                    pos != stats.royal_flushes.end())
+                {
+                    royal_flushes = pos->second;
+                }
+
+                if (royal_flushes > 0)
+                {
+                    temp::println("{:^17} {:^10} {:^10.6f}", "Royal Flushes",
+                        royal_flushes,
+                        math::percent(royal_flushes, stats.simulations).to_ratio());
+                }
+            }
+
+            {
+                std::size_t flushes{ 0 };
+
+                if (auto pos = stats.flushes.find(round);
+                    pos != stats.flushes.end())
+                {
+                    flushes = pos->second;
+                }
+
+                if (flushes > 0)
+                {
+                    temp::println("{:^17} {:^10} {:^10.6f}", "Flushes",
+                        flushes,
+                        math::percent(flushes, stats.simulations).to_ratio());
+                }
+            }
+
             temp::println("");
         }
     }

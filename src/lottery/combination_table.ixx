@@ -1,9 +1,16 @@
+module;
+
+#include <cassert>
+
 export module nhl:lottery_combination_table;
 
 import temp_std;
 import :lottery_parameters;
 import :lottery_ranking_combinations;
 import :lottery_combination_value;
+import :lottery_potential_winners;
+import :lottery_parameters;
+import :lottery_combination;
 
 export namespace nhl::lottery
 {
@@ -76,6 +83,37 @@ export namespace nhl::lottery
     private:
         ranking_combination_distribution_type ranking_combination_distribution_;
     };
+
+    inline potential_winners get_potential_winners(
+        combination_table const& table, std::set<ball> const& drawn_balls)
+    {
+        assert(drawn_balls.size() == (balls_to_draw - 1));
+
+        potential_winners ret;
+
+        for (auto const& ball : nhl::lottery::balls)
+        {
+            if (!drawn_balls.contains(ball))
+            {
+                std::array<nhl::lottery::ball, nhl::lottery::balls_to_draw>
+                    combo_balls;
+
+                for (std::size_t i = 0; auto const& drawn_ball : drawn_balls)
+                {
+                    combo_balls[i++] = drawn_ball;
+                }
+                combo_balls.back() = ball;
+
+                nhl::lottery::combination combo{ combo_balls };
+                if (const auto winner = table.lookup(to_value(combo)))
+                {
+                    ret.data[ball] = *winner;
+                }
+            }
+        }
+
+        return ret;
+    }
 
     inline void print_combination_table(combination_table const& table)
     {

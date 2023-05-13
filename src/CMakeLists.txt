@@ -11,6 +11,7 @@ add_library(nhl STATIC
         lottery/machine.ixx
         lottery/odds.ixx
         lottery/parameters.ixx
+        lottery/potential_winners.ixx
         lottery/ranking.ixx
         lottery/ranking_combinations.ixx
         lottery/round.ixx

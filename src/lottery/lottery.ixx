@@ -10,6 +10,7 @@ export import :lottery_teams;
 export import :lottery_machine;
 export import :lottery_odds;
 export import :lottery_parameters;
+export import :lottery_potential_winners;
 export import :lottery_ranking_combinations;
 export import :lottery_ranking;
 export import :lottery_round;

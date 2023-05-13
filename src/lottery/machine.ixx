@@ -17,6 +17,11 @@ export namespace nhl::lottery
         {
         }
 
+        std::vector<ball> const& balls() const
+        {
+            return balls_;
+        }
+
         template<typename T, std::size_t N>
         requires (std::is_same_v<std::remove_cvref_t<T>, ball>)
         void load_balls(std::span<T,N> balls)

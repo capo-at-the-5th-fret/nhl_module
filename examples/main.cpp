@@ -277,6 +277,36 @@ int main(int argc, char* argv[])
                     temp::println("{}", ball);
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
+
+                if (round == nhl::lottery::round_number{ 1 } &&
+                    (b == (nhl::lottery::balls_to_draw - 2)))
+                {
+                    std::set<nhl::lottery::ball> balls
+                    {
+                        drawn_balls.begin(),
+                        std::next(drawn_balls.begin(), b + 1)
+                    };
+
+                    {
+                        const auto pw = nhl::lottery::get_potential_winners(
+                            combinations, balls);
+
+                        record_potential_winners(stats, round, pw);
+
+                        if (nhl::lottery::is_clean_sweep(pw))
+                        {
+                            record_clean_sweep(stats, round);
+                        }
+                        else if (nhl::lottery::is_royal_flush(pw))
+                        {
+                            record_royal_flush(stats, round);
+                        }
+                        else if (nhl::lottery::is_flush(pw))
+                        {
+                            record_flush(stats, round);
+                        }
+                    }
+                }
             }
 
             nhl::lottery::combination combo{ drawn_balls };
