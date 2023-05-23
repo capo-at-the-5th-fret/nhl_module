@@ -1,7 +1,10 @@
-#include <cxxopts.hpp>
+#include <cassert>
 
 import temp_std;
 import nhl;
+
+// NOTE: This include must come after the imports, otherwise errors
+#include <cxxopts.hpp>
 
 inline constexpr std::string_view app_name{ "nhl_dls" };
 inline constexpr std::string_view app_version{ "1.0" };
@@ -235,10 +238,10 @@ int main(int argc, char* argv[])
         nhl::lottery::machine machine;
         nhl::lottery::combination_table combinations{ true };
 
-        auto draft_order = nhl::lottery::rankings;
+        auto tentative_draft_order{ nhl::lottery::rankings };
+        decltype(tentative_draft_order) final_draft_order{};
 
         nhl::lottery::round_winners round_winners;
-        std::unordered_set<int> winners;
 
         for (nhl::lottery::round_number round{ 1 }; round <=
             nhl::lottery::round_number{ static_cast<int>(stats.rounds) };)
@@ -319,70 +322,77 @@ int main(int argc, char* argv[])
                         combo, *winner);
                 }
 
-                auto remaining_draft_order = draft_order | std::views::drop(
-                    static_cast<int>(round) - 1);
+                const auto winner_index = *winner - 1;
 
-                if (winners.contains(*winner))
+                // winner was found in the final draft order list; this means
+                // the winner is already locked in from a previous round and a
+                // redraw is required
+                if (auto pos = std::ranges::find(final_draft_order, winner);
+                    pos != std::ranges::end(final_draft_order))
                 {
                     record_redraw(stats, round);
-                    //stats.redraws[round]++;
 
                     if (print_progress)
                     {
-                        temp::println("{} is a previous winner. Redraw required",
-                            *winner);
+                        temp::println(
+                            "{} is already locked in to the {} pick. A redraw is required",
+                            *winner, std::distance(final_draft_order.begin(), pos) + 1);
                     }
+                    continue;
                 }
-                else if (auto pos = std::ranges::find(remaining_draft_order,
-                    winner); pos != std::ranges::end(remaining_draft_order))
+
+                // find the first 'empty' slot in the final draft order list
+                auto slot_pos = std::ranges::find(final_draft_order, 0);
+                assert(slot_pos != std::ranges::end(final_draft_order));
+
+                // the slot up for grabs this round
+                const auto slot = slot_pos -
+                    std::ranges::begin(final_draft_order) + 1;
+
+                // team that won can jump to slot
+                if (winner <= (slot + nhl::lottery::max_ranking_jump))
                 {
-                    const auto top_ranking = static_cast<int>(round);
-
-                    const auto adjusted_ranking =
-                        (winner <= nhl::lottery::max_ranking_jump) ?
-                        top_ranking :
-                        std::max(*winner - nhl::lottery::max_ranking_jump,
-                            top_ranking);
-
-                    const auto places_from_top = adjusted_ranking - top_ranking;
-
-                    // Reference:
-                    // https://stackoverflow.com/questions/26176001/c-easiest-most-efficient-way-to-move-a-single-element-to-a-new-position-within
-
-                    std::ranges::rotate(
-                        remaining_draft_order.begin() + places_from_top,
-                        pos,
-                        pos + 1
-                    );
-
-                    winners.insert(*winner);
-                    record_lottery_winner(stats, round, *winner);
-                    round_winners.push(*winner);
-                    //stats.lottery_winner_stats[round][*winner]++;
-
-                    ++round;
+                    *slot_pos = *winner;
+                    tentative_draft_order[winner_index] = 0;
                 }
+                // team that won can't jump to slot
                 else
                 {
-                    record_redraw(stats, round);
-                    //stats.redraws[round]++;
+                    // highest ranked team remaining in the pre-lottery draft order
+                    // 'wins' the slot
+                    auto surrogate_winner_pos = std::ranges::find_if_not(
+                        tentative_draft_order, [](auto t) { return t == 0; });
+                    assert(surrogate_winner_pos !=
+                        std::ranges::end(tentative_draft_order));
 
-                    if (print_progress)
-                    {
-                        temp::println("{} is locked in from a previous round. "
-                            "Redraw required", *winner);
-                    }
+                    *slot_pos = *surrogate_winner_pos;
+                    *surrogate_winner_pos = 0;
+
+                    // The slot that the winner will move to
+                    const auto jump_slot = *winner -
+                        nhl::lottery::max_ranking_jump;
+
+                    auto jump_slot_pos = std::ranges::find(
+                        std::ranges::begin(final_draft_order) + (jump_slot - 1),
+                        std::ranges::end(final_draft_order), 0);
+                    assert(jump_slot_pos != std::ranges::end(final_draft_order));
+
+                    *jump_slot_pos = *winner;
+                    tentative_draft_order[winner_index] = 0;
                 }
 
                 if (print_progress)
                 {
                     temp::println("");
                 }
+
+                record_lottery_winner(stats, round, *winner);
+                round_winners.push(*winner);
+                ++round;
             }
             else
             {
                 record_redraw(stats, round);
-                //stats.redraws[round]++;
 
                 if (print_progress)
                 {
@@ -398,24 +408,35 @@ int main(int argc, char* argv[])
             }
         }
 
+        // add remaining teams to final_draft_order, in order from 1 to 16
+        auto empty_slots = final_draft_order |
+            std::views::filter([](auto t) { return t == 0; });
+        auto remaining_seeds = tentative_draft_order |
+            std::views::filter([](auto t) { return t != 0; });
+
+        for (auto pos = empty_slots.begin(); const auto team : remaining_seeds)
+        {
+            assert(pos != std::ranges::end(empty_slots));
+            *pos = team;
+            ++pos;
+        }
+
         record_lottery_winners(stats, round_winners);
 
-        for (int ranking = 1; auto team : draft_order)
+        for (int ranking = 1; auto team : final_draft_order)
         {
             record_draft_order_ranking(stats, team, ranking);
-            //stats.draft_order_stats[team][ranking]++;
             ++ranking;
         }
 
-        if (std::ranges::is_sorted(draft_order))
+        if (std::ranges::is_sorted(final_draft_order))
         {
             record_original_draft_order_retained(stats);
-            //stats.original_draft_order_retained++;
         }
 
         if (print_progress)
         {
-            nhl::lottery::print_draft_order(draft_order);
+            nhl::lottery::print_draft_order(final_draft_order);
         }
     });
 

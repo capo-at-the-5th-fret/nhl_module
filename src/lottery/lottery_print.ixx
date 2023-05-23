@@ -52,7 +52,7 @@ export namespace nhl::lottery
                 math::percent(redraws, stats.simulations).to_ratio());
             temp::println("");
 
-            temp::println("{:^17} {:^10} {:^10}", "Potential Winners", "Count", "Pct.");
+            /*temp::println("{:^17} {:^10} {:^10}", "Potential Winners", "Count", "Pct.");
             temp::println("{0:17} {1:10} {1:10}", "-----------------", "----------");
 
             {
@@ -114,7 +114,7 @@ export namespace nhl::lottery
                         flushes,
                         math::percent(flushes, stats.simulations).to_ratio());
                 }
-            }
+            }*/
 
             temp::println("");
         }

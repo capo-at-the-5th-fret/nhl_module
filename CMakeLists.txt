@@ -14,18 +14,18 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     option(NHL_BUILD_BENCHMARKS "Enable or disable the building of benchmarks" ON)
     #option(NHL_ENABLE_INSTALL "Enable or disable the install rule" ON)
 
-    if (NHL_BUILD_TESTS)
-        enable_testing()
-        add_subdirectory(tests)
-    endif()
+    # if (NHL_BUILD_TESTS)
+    #     enable_testing()
+    #     add_subdirectory(tests)
+    # endif()
 
     if (NHL_BUILD_EXAMPLES)
         add_subdirectory(examples)
     endif()
 
-    if (NHL_BUILD_BENCHMARKS)
-        add_subdirectory(benchmarks)
-    endif()
+    # if (NHL_BUILD_BENCHMARKS)
+    #     add_subdirectory(benchmarks)
+    # endif()
 
     # if (NHL_ENABLE_INSTALL)
 
